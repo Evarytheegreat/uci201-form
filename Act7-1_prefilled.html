@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Registration Form — Act7-1</title>
+<style>
+    :root{
+      --max-width:780px;
+      --gap:12px;
+      --err:#b00020;
+      --muted:#666;
+      --card-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    body{
+      background:#f4f6f8;
+      margin:24px;
+      display:flex;
+      justify-content:center;
+      font-size:16px;
+    }
+    .card{
+      width:100%;
+      max-width:var(--max-width);
+      background:#fff;
+      border-radius:10px;
+      box-shadow:var(--card-shadow);
+      padding:22px;
+    }
+    h1{ margin:0 0 8px 0; font-size:20px;}
+    p.lead{ color:var(--muted); margin-top:0; margin-bottom:18px; font-size:14px; }
+
+    form {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+      align-items:start;
+    }
+    .full { grid-column: 1 / -1; }
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    label { font-weight:600; font-size:14px; }
+    input, select {
+      padding:10px 12px;
+      border:1px solid #cfd8dd;
+      border-radius:6px;
+      font-size:15px;
+    }
+    input:focus, select:focus { outline:2px solid rgba(21,156,228,0.15); border-color:#159ce4; }
+
+    .row { display:flex; gap:10px; }
+    .hint { font-size:13px; color:var(--muted); }
+    .error {
+      color:var(--err);
+      font-size:13px;
+      margin-top:4px;
+      min-height:18px;
+    }
+    .buttons { display:flex; gap:10px; }
+    button {
+      padding:10px 14px;
+      border-radius:8px;
+      border:0;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn-primary { background:#1d72f3; color:white; }
+    .btn-secondary { background:#e6e9ee; color:#222; }
+    @media (max-width:700px){
+      form{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main class="card" role="main">
+<h1>Register</h1>
+<p class="lead">Fill the fields and click Register. Inline errors appear for invalid entries.</p>
+<form id="regForm" novalidate="">
+<!-- Full name -->
+<div class="field full">
+<label for="fullname">Full Name</label>
+<input autocomplete="name" id="fullname" name="fullname" placeholder="Jane Doe" required="" type="text" value="Evary J. Kreese"/>
+<div aria-live="polite" class="error" id="err-fullname"></div>
+</div>
+<!-- Password & confirm -->
+<div class="field">
+<label for="password">Password</label>
+<input autocomplete="new-password" id="password" minlength="6" name="password" placeholder="At least 6 characters" required="" type="password" value="Pass1234"/>
+<div aria-live="polite" class="error" id="err-password"></div>
+</div>
+<div class="field">
+<label for="confirm">Confirm Password</label>
+<input autocomplete="new-password" id="confirm" name="confirm" placeholder="Repeat password" required="" type="password" value="Pass1234"/>
+<div aria-live="polite" class="error" id="err-confirm"></div>
+</div>
+<!-- Email -->
+<div class="field">
+<label for="email">Email</label>
+<input autocomplete="email" id="email" name="email" placeholder="name@example.com" required="" type="email" value="evary@example.com"/>
+<div aria-live="polite" class="error" id="err-email"></div>
+</div>
+<!-- Phone Number -->
+<div class="field">
+<label for="phone">Phone Number</label>
+<input id="phone" name="phone" placeholder="+254712345678" required="" type="tel" value="+254712345678"/>
+<div aria-live="polite" class="error" id="err-phone"></div>
+</div>
+<!-- Zip Code -->
+<div class="field">
+<label for="zip">Zip Code</label>
+<input id="zip" name="zip" pattern="^[A-Za-z0-9\- ]{3,10}$" placeholder="e.g. 10001 or 50100" type="text" value="50100"/>
+<div aria-live="polite" class="error" id="err-zip"></div>
+</div>
+<!-- Card Type -->
+<div class="field">
+<label for="cardType">Card Type</label>
+<select id="cardType" name="cardType">
+<option value="">Select card</option>
+<option selected="selected">Visa</option>
+<option>MasterCard</option>
+<option>American Express</option>
+<option>Other</option>
+</select>
+<div aria-live="polite" class="error" id="err-cardType"></div>
+</div>
+<!-- Card Number -->
+<div class="field full">
+<label for="cardNumber">Card Number</label>
+<input id="cardNumber" inputmode="numeric" name="cardNumber" placeholder="1234 5678 9012 3456" value="4111111111111111"/>
+<div aria-live="polite" class="error" id="err-cardNumber"></div>
+</div>
+<!-- Expiry date -->
+<div class="field">
+<label for="expiry">Expiry Date (MM/YY)</label>
+<input id="expiry" name="expiry" pattern="^(0[1-9]|1[0-2])\/?([0-9]{2})$" placeholder="MM/YY" type="text" value="12/30"/>
+<div aria-live="polite" class="error" id="err-expiry"></div>
+</div>
+<!-- Buttons -->
+<div class="field full buttons">
+<button class="btn-primary" type="submit">Register</button>
+<button class="btn-secondary" id="clearBtn" type="button">Clear Form</button>
+</div>
+</form>
+</main>
+<script>
+    function showError(id, msg) {
+      document.getElementById('err-' + id).textContent = msg || '';
+    }
+    function luhnCheck(cc) {
+      let s = 0, dbl = false;
+      for (let i = cc.length - 1; i >= 0; i--) {
+        let d = parseInt(cc.charAt(i), 10);
+        if (isNaN(d)) return false;
+        if (dbl) { d = d * 2; if (d > 9) d -= 9; }
+        s += d;
+        dbl = !dbl;
+      }
+      return (s % 10) === 0;
+    }
+    const form = document.getElementById('regForm');
+    function validateFullName() {
+      const el = document.getElementById('fullname');
+      if (!el.value.trim()) { showError('fullname','Full name is required'); return false; }
+      showError('fullname',''); return true;
+    }
+    function validatePassword() {
+      const el = document.getElementById('password');
+      if (!el.value) { showError('password','Password is required'); return false; }
+      if (el.value.length < 6) { showError('password','Password must be at least 6 characters'); return false; }
+      showError('password',''); return true;
+    }
+    function validateConfirm() {
+      const p = document.getElementById('password').value;
+      const c = document.getElementById('confirm').value;
+      if (!c) { showError('confirm','Confirm password is required'); return false; }
+      if (p !== c) { showError('confirm','Passwords do not match'); return false; }
+      showError('confirm',''); return true;
+    }
+    function validateEmail() {
+      const el = document.getElementById('email');
+      if (!el.value) { showError('email','Email is required'); return false; }
+      if (!el.checkValidity()) { showError('email','Invalid email format'); return false; }
+      showError('email',''); return true;
+    }
+    function validatePhone() {
+      const el = document.getElementById('phone');
+      const v = el.value.trim();
+      if (!v) { showError('phone','Phone number is required'); return false; }
+      const re = /^\+?[\d\s\-]{7,20}$/;
+      if (!re.test(v)) { showError('phone','Invalid phone number'); return false; }
+      showError('phone',''); return true;
+    }
+    function validateZip() {
+      const el = document.getElementById('zip');
+      const v = el.value.trim();
+      if (!v) { showError('zip',''); return true; }
+      const re = /^[A-Za-z0-9\- ]{3,10}$/;
+      if (!re.test(v)) { showError('zip','Invalid Zip Code'); return false; }
+      showError('zip',''); return true;
+    }
+    function validateCardNumber() {
+      const el = document.getElementById('cardNumber');
+      const v = el.value.replace(/\s+/g,'');
+      if (!v) { showError('cardNumber',''); return true; }
+      if (!/^\d{13,19}$/.test(v)) { showError('cardNumber','Invalid card number format'); return false; }
+      if (!luhnCheck(v)) { showError('cardNumber','Invalid card number (failed check)'); return false; }
+      showError('cardNumber',''); return true;
+    }
+    function validateExpiry() {
+      const el = document.getElementById('expiry');
+      const v = el.value.trim();
+      if (!v) { showError('expiry',''); return true; }
+      const re = /^(0[1-9]|1[0-2])\/?([0-9]{2})$/;
+      const m = v.match(re);
+      if (!m) { showError('expiry','Invalid date format'); return false; }
+      const mm = parseInt(m[1],10);
+      const yy = parseInt(m[2],10);
+      const fullYear = 2000 + yy;
+      const expiry = new Date(fullYear, mm - 1 + 1, 1);
+      const now = new Date();
+      if (expiry <= now) { showError('expiry','Card has expired'); return false; }
+      showError('expiry',''); return true;
+    }
+    ['fullname','password','confirm','email','phone','zip','cardNumber','expiry'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', () => {
+        switch(id){
+          case 'fullname': validateFullName(); break;
+          case 'password': validatePassword(); validateConfirm(); break;
+          case 'confirm': validateConfirm(); break;
+          case 'email': validateEmail(); break;
+          case 'phone': validatePhone(); break;
+          case 'zip': validateZip(); break;
+          case 'cardNumber': validateCardNumber(); break;
+          case 'expiry': validateExpiry(); break;
+        }
+      });
+    });
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      const checks = [
+        validateFullName(),
+        validatePassword(),
+        validateConfirm(),
+        validateEmail(),
+        validatePhone(),
+        validateZip(),
+        validateCardNumber(),
+        validateExpiry()
+      ];
+      if (checks.every(Boolean)) {
+        alert('Form is valid — ready to submit (demo).');
+        form.reset();
+        ['fullname','password','confirm','email','phone','zip','cardNumber','expiry'].forEach(id => showError(id,''));
+      } else {
+        const firstErr = document.querySelector('.error:not(:empty)');
+        if (firstErr) {
+          const id = firstErr.id.replace('err-','');
+          const el = document.getElementById(id);
+          if (el) el.focus();
+        }
+      }
+    });
+    document.getElementById('clearBtn').addEventListener('click', function(){
+      form.reset();
+      ['fullname','password','confirm','email','phone','zip','cardNumber','expiry','cardType'].forEach(id => showError(id,''));
+      document.getElementById('fullname').focus();
+    });
+  </script>
+</body>
+</html>
